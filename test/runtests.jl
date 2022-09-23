@@ -24,4 +24,9 @@ using DssOpt
         ]
         @test opt_md(target; kwargs...) isa String
     end
+
+    # verbose
+    redirect_stdio(stdout=devnull, stderr=devnull) do
+        @test opt_md(target; verbose=true) isa String
+    end
 end

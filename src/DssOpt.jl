@@ -10,6 +10,7 @@ import .LibDssOpt
 export opt_md
 
 function opt_md(target::AbstractString;
+                verbose::Bool=false,
                 seq_constraints_hard::Union{Nothing,AbstractString}=nothing,
                 timestep::Union{Nothing,Real}=nothing,
                 start_temperature::Union{Nothing,Real}=nothing,
@@ -29,7 +30,6 @@ function opt_md(target::AbstractString;
     # --movie
     isempty(target) && return ""
     cmd = `$(DssOpt_jll.opt_md())`
-    # TODO: check length(seq_constraints_hard) == length(target)
     !isnothing(seq_constraints_hard) && (cmd = `$cmd --seq-constraints-hard $seq_constraints_hard`)
     !isnothing(timestep) && (cmd = `$cmd --timestep $(float(timestep))`)
     !isnothing(start_temperature) && (cmd = `$cmd --T-start $(float(start_temperature))`)
@@ -50,8 +50,20 @@ function opt_md(target::AbstractString;
     !isnothing(time_pur) && (cmd = `$cmd --time-pur $(float(time_pur))`)
     !isnothing(kpur_end) && (cmd = `$cmd --kpur-end $(float(kpur_end))`)
     !isnothing(seed) && (cmd = `$cmd --seed $(Int(seed))`)
+    cmd = `$cmd $target`
 
-    out = read(`$cmd $target`, String)
+    outbuf = IOBuffer()
+    errbuf = IOBuffer()
+    r = run(pipeline(ignorestatus(cmd); stdin=devnull, stdout=outbuf, stderr=errbuf))
+    out = String(take!(outbuf))
+    err = String(take!(errbuf))
+    if r.exitcode != 0
+        error("while running opt-md command\n" * out * err)
+    end
+    if verbose
+        println(out)
+        println(err)
+    end
     seq = split(out, "\n")[end-1] |> s -> split(s, "=")[end] |> lstrip |> String
     return seq
 end
