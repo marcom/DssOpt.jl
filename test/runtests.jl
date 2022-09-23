@@ -22,11 +22,69 @@ using DssOpt
         (; kpur_end = 1.1),
         (; seed = 42),
         ]
-        @test opt_md(target; kwargs...) isa String
+        s = opt_md(target; kwargs...)
+        @test s isa String
+        @test length(s) == length(target)
     end
 
     # verbose
     redirect_stdio(stdout=devnull, stderr=devnull) do
-        @test opt_md(target; verbose=true) isa String
+        s = opt_md(target; verbose=true)
+        @test s isa String
+        @test length(s) == length(target)
+    end
+end
+
+@testset "opt_sd" begin
+    target = "(((...)))"
+    for kwargs in [
+        (; ),
+        (; maxsteps = 100),
+        (; kpi = 10000.1),
+        (; kpa = 10000.1),
+        (; kneg = 1.1),
+        (; kpur = 1.1),
+        (; khet = 10.1),
+        (; het_window = 3),
+        (; wiggle = 0.01),
+        (; seed = 42),
+        ]
+        s = opt_sd(target; kwargs...)
+        @test s isa String
+        @test length(s) == length(target)
+    end
+
+    # verbose
+    redirect_stdio(stdout=devnull, stderr=devnull) do
+        s = opt_sd(target; verbose=true)
+        @test s isa String
+        @test length(s) == length(target)
+    end
+end
+
+@testset "opt_sd_gsl" begin
+    target = "(((...)))"
+    for kwargs in [
+        (; ),
+        (; maxsteps = 100),
+        (; kpi = 10000.1),
+        (; kpa = 10000.1),
+        (; kneg = 1.1),
+        (; kpur = 1.1),
+        (; khet = 10.1),
+        (; het_window = 3),
+        (; wiggle = 0.01),
+        (; seed = 42),
+        ]
+        s = opt_sd_gsl(target; kwargs...)
+        @test s isa String
+        @test length(s) == length(target)
+    end
+
+    # verbose
+    redirect_stdio(stdout=devnull, stderr=devnull) do
+        s = opt_sd_gsl(target; verbose=true)
+        @test s isa String
+        @test length(s) == length(target)
     end
 end

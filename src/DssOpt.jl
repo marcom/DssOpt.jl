@@ -7,7 +7,7 @@ import DssOpt_jll
 include("../lib/LibDssOpt.jl")
 import .LibDssOpt
 
-export opt_md
+export opt_md, opt_sd, opt_sd_gsl
 
 function opt_md(target::AbstractString;
                 verbose::Bool=false,
@@ -59,6 +59,54 @@ function opt_md(target::AbstractString;
     err = String(take!(errbuf))
     if r.exitcode != 0
         error("while running opt-md command\n" * out * err)
+    end
+    if verbose
+        println(out)
+        println(err)
+    end
+    seq = split(out, "\n")[end-1] |> s -> split(s, "=")[end] |> lstrip |> String
+    return seq
+end
+
+opt_sd(target; kwargs...) = _run_opt_sd(DssOpt_jll.opt_sd(), target; kwargs...)
+
+opt_sd_gsl(target; kwargs...) = _run_opt_sd(DssOpt_jll.opt_sd_gsl(), target; kwargs...)
+
+function _run_opt_sd(program,
+                     target::AbstractString;
+                     verbose::Bool=false,
+                     maxsteps::Union{Nothing,Integer}=nothing,
+                     kpi::Union{Nothing,Real}=nothing,
+                     kpa::Union{Nothing,Real}=nothing,
+                     kneg::Union{Nothing,Real}=nothing,
+                     kpur::Union{Nothing,Real}=nothing,
+                     khet::Union{Nothing,Real}=nothing,
+                     het_window::Union{Nothing,Integer}=nothing,
+                     wiggle::Union{Nothing,Real}=nothing,
+                     seed::Union{Nothing,Integer}=nothing)
+    # unsupported command-line arguments:
+    # --nprint
+    # --movie
+    isempty(target) && return ""
+    cmd = `$program`
+    !isnothing(maxsteps) && (cmd = `$cmd --maxsteps $(Int(maxsteps))`)
+    !isnothing(kpi) && (cmd = `$cmd --kpi $(float(kpi))`)
+    !isnothing(kpa) && (cmd = `$cmd --kpa $(float(kpa))`)
+    !isnothing(kneg) && (cmd = `$cmd --kneg $(float(kneg))`)
+    !isnothing(kpur) && (cmd = `$cmd --kpur $(float(kpur))`)
+    !isnothing(khet) && (cmd = `$cmd --khet $(float(khet))`)
+    !isnothing(het_window) && (cmd = `$cmd --het-window $(Int(het_window))`)
+    !isnothing(wiggle) && (cmd = `$cmd --wiggle $(float(wiggle))`)
+    !isnothing(seed) && (cmd = `$cmd --seed $(Int(seed))`)
+    cmd = `$cmd $target`
+
+    outbuf = IOBuffer()
+    errbuf = IOBuffer()
+    r = run(pipeline(ignorestatus(cmd); stdin=devnull, stdout=outbuf, stderr=errbuf))
+    out = String(take!(outbuf))
+    err = String(take!(errbuf))
+    if r.exitcode != 0
+        error("while running command\n" * out * err)
     end
     if verbose
         println(out)
