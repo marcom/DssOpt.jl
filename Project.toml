@@ -1,0 +1,14 @@
+name = "DssOpt"
+uuid = "dd991cc5-6c0c-41eb-99d9-665139bba8ab"
+authors = ["Marco Matthies <marco.matthies@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
+DssOpt_jll = "2c93a0bb-ae27-5046-8047-3b3578ee1502"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

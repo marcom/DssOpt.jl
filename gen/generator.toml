@@ -1,0 +1,7 @@
+[general]
+library_name = "libdssopt"
+output_file_path = "../lib/LibDssOpt.jl"
+module_name = "LibDssOpt"
+jll_pkg_name = "DssOpt_jll"
+#export_symbol_prefixes = ["dss_"]
+prologue_file_path = "./prologue.jl"
