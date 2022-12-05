@@ -9,6 +9,8 @@ import .LibDssOpt
 
 export opt_md, opt_sd, opt_sd_gsl
 
+_splitlines(str) = readlines(IOBuffer(str))
+
 function opt_md(target::AbstractString;
                 verbose::Bool=false,
                 seq_constraints_hard::Union{Nothing,AbstractString}=nothing,
@@ -64,7 +66,8 @@ function opt_md(target::AbstractString;
         println(out)
         println(err)
     end
-    seq = split(out, "\n")[end-1] |> s -> split(s, "=")[end] |> lstrip |> String
+    lastline = _splitlines(out)[end]
+    seq = split(lastline, "=")[end] |> strip |> String
     return seq
 end
 
@@ -112,7 +115,8 @@ function _run_opt_sd(program,
         println(out)
         println(err)
     end
-    seq = split(out, "\n")[end-1] |> s -> split(s, "=")[end] |> lstrip |> String
+    lastline = _splitlines(out)[end]
+    seq = split(lastline, "=")[end] |> strip |> String
     return seq
 end
 
