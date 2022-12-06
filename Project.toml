@@ -7,6 +7,11 @@ version = "0.1.0"
 CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 DssOpt_jll = "2c93a0bb-ae27-5046-8047-3b3578ee1502"
 
+[compat]
+CEnum = "0.4"
+DssOpt_jll = "1"
+julia = "1.6"
+
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
