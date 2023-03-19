@@ -3,6 +3,6 @@ Clang = "40e3b903-d033-50b4-a0cc-940c62c95e31"
 DssOpt_jll = "2c93a0bb-ae27-5046-8047-3b3578ee1502"
 
 [compat]
+Clang = "0.17"
+DssOpt_jll = "1.0.1"
 julia = "1.6"
-Clang = "0.16.1"
-DssOpt_jll = "1.99"
