@@ -32,6 +32,10 @@ function dary2d_set(n1, n2, a, val)
     ccall((:dary2d_set, libdssopt), Cvoid, (Csize_t, Csize_t, Ptr{Ptr{Cdouble}}, Cdouble), n1, n2, a, val)
 end
 
+function dary2d_equal(a, b, n1, n2)
+    ccall((:dary2d_equal, libdssopt), Bool, (Ptr{Ptr{Cdouble}}, Ptr{Ptr{Cdouble}}, Csize_t, Csize_t), a, b, n1, n2)
+end
+
 function dary2d_print(a, n1, n2)
     ccall((:dary2d_print, libdssopt), Cvoid, (Ptr{Ptr{Cdouble}}, Csize_t, Csize_t), a, n1, n2)
 end
@@ -58,12 +62,10 @@ function random_seed(seed)
     ccall((:random_seed, libdssopt), Cvoid, (uint,), seed)
 end
 
-# no prototype is found for this function at random.h:12:6, please use with caution
 function random_get_seedval_from_current_time()
     ccall((:random_get_seedval_from_current_time, libdssopt), uint, ())
 end
 
-# no prototype is found for this function at random.h:15:6, please use with caution
 function random_seed_with_current_time()
     ccall((:random_seed_with_current_time, libdssopt), Cvoid, ())
 end
@@ -72,7 +74,6 @@ function random_uint(a, b)
     ccall((:random_uint, libdssopt), uint, (uint, uint), a, b)
 end
 
-# no prototype is found for this function at random.h:22:8, please use with caution
 function random_double_uniform()
     ccall((:random_double_uniform, libdssopt), Cdouble, ())
 end

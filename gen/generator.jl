@@ -1,3 +1,17 @@
+#!/usr/bin/env julia
+
+import Pkg
+
+cd(@__DIR__)
+Pkg.activate(".")
+
+# Stack environment from parent dir on top of env from this dir.  This
+# is so we always use the same versions for common dependencies
+pushfirst!(LOAD_PATH, joinpath(@__DIR__, ".."))
+println("LOAD_PATH =")
+display(LOAD_PATH)
+println()
+
 using Clang.Generators
 using DssOpt_jll
 
@@ -11,6 +25,7 @@ options = load_options(joinpath(@__DIR__, "generator.toml"))
 args = get_default_args()
 append!(args, [
     "-I$include_dir",
+    "-std=c99",
 ])
 
 accept_headers = [
