@@ -86,6 +86,18 @@ function random_dvec_uniform_direction(ndim, v)
     ccall((:random_dvec_uniform_direction, libdssopt), Cvoid, (uint, Ptr{Cdouble}), ndim, v)
 end
 
+function x_parse_seq_constraints_hard(n, hard, constraint_str, pairs)
+    ccall((:x_parse_seq_constraints_hard, libdssopt), uint, (uint, Ptr{uint}, Ptr{Cchar}, Ptr{uint}), n, hard, constraint_str, pairs)
+end
+
+function run_md(vienna, seq_constraints_hard, nsteps, nprint, ncool, npur, timestep, T_start, kpi, kpa, kneg, khet, het_window, kpur_end, do_exp_cool, do_movie_output, verbose, designed_seq)
+    ccall((:run_md, libdssopt), Cint, (Ptr{Cchar}, Ptr{Cchar}, uint, uint, uint, uint, Cdouble, Cdouble, Cdouble, Cdouble, Cdouble, Cdouble, uint, Cdouble, Bool, Bool, Bool, Ptr{Ptr{Cchar}}), vienna, seq_constraints_hard, nsteps, nprint, ncool, npur, timestep, T_start, kpi, kpa, kneg, khet, het_window, kpur_end, do_exp_cool, do_movie_output, verbose, designed_seq)
+end
+
+function run_sd(vienna, maxsteps, nprint, wiggle, kpi, kpa, kpur, kneg, khet, het_window, do_movie_output, verbose, designed_seq)
+    ccall((:run_sd, libdssopt), Cint, (Ptr{Cchar}, uint, uint, Cdouble, Cdouble, Cdouble, Cdouble, Cdouble, Cdouble, uint, Bool, Bool, Ptr{Ptr{Cchar}}), vienna, maxsteps, nprint, wiggle, kpi, kpa, kpur, kneg, khet, het_window, do_movie_output, verbose, designed_seq)
+end
+
 function dss_calc_U_pa(p, n, ndim, k)
     ccall((:dss_calc_U_pa, libdssopt), Cdouble, (Ptr{Ptr{Cdouble}}, uint, uint, Cdouble), p, n, ndim, k)
 end
@@ -158,8 +170,8 @@ function fix_bad_bp(seq, pairs, n)
     ccall((:fix_bad_bp, libdssopt), Csize_t, (Ptr{Cchar}, Ptr{uint}, Csize_t), seq, pairs, n)
 end
 
-function show_bad_prob(p, n1, n2)
-    ccall((:show_bad_prob, libdssopt), Cvoid, (Ptr{Ptr{Cdouble}}, Csize_t, Csize_t), p, n1, n2)
+function show_bad_prob(p, n1, n2, verbose)
+    ccall((:show_bad_prob, libdssopt), Cvoid, (Ptr{Ptr{Cdouble}}, Csize_t, Csize_t, Bool), p, n1, n2, verbose)
 end
 
 function print_for_movie(p, n, ndim, seq)

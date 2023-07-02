@@ -33,6 +33,7 @@ accept_headers = [
     "ctools/libctools.h",
     "ctools/num_utils.h",
     "ctools/random.h",
+    "opt.h",
     "dss.h",
     "helpers-for-main.h",
     "helpers-for-main-opt.h",
