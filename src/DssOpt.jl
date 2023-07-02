@@ -7,6 +7,7 @@ import DssOpt_jll
 include("../lib/LibDssOpt.jl")
 import .LibDssOpt
 
+include("opt.jl")
 include("exe.jl")
 
 end # module

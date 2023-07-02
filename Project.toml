@@ -9,7 +9,7 @@ DssOpt_jll = "2c93a0bb-ae27-5046-8047-3b3578ee1502"
 
 [compat]
 CEnum = "0.4"
-DssOpt_jll = "1.0.4"
+DssOpt_jll = "=1.0.4"
 julia = "1.6"
 
 [extras]
