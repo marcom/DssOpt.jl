@@ -1,5 +1,7 @@
 # call the optimisation functions `run_md`, `run_sd`
 
+export opt_md
+
 # TODO
 # - seq_constraints_hard
 # - set force constants
