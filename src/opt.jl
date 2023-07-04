@@ -9,7 +9,7 @@ export opt_md
 #    het_window = Cuint(0)
 #    set_dss_force_constants_defaults(kpi, kpa, kneg, kpur_end, khet, het_window)
 function opt_md(target_dbn::AbstractString;
-                seq_constraints_hard = Ptr{Cvoid}(C_NULL),
+                seq_constraints_hard::Union{AbstractString,Nothing} = nothing,
                 # nsteps = 100,
                 # nprint = 10,
                 # ncool = 50,
@@ -35,6 +35,15 @@ function opt_md(target_dbn::AbstractString;
     ncool  = Cuint(round(time_cool  / timestep))
     npur   = Cuint(round(time_pur   / timestep))
 
+    c_seq_constraints_hard = if seq_constraints_hard === nothing
+        Ptr{Int8}(C_NULL)
+    else
+        if length(seq_constraints_hard) != length(target_dbn)
+            throw(ArgumentError("target_dbn and seq_constraints_hard must have same length"))
+        end
+        Base.unsafe_convert(Ptr{Int8}, seq_constraints_hard)::Ptr{Int8}
+    end
+
     kpi        = Ref(Cdouble(0.0))
     kpa        = Ref(Cdouble(0.0))
     kneg       = Ref(Cdouble(0.0))
@@ -46,7 +55,7 @@ function opt_md(target_dbn::AbstractString;
     vienna = target_dbn
     c_designed_seq = Ptr{Ptr{UInt8}}(Libc.malloc(length(vienna) + 1))
     ret = LibDssOpt.run_md(
-        vienna, seq_constraints_hard, nsteps, nprint, ncool, npur,
+        vienna, c_seq_constraints_hard, nsteps, nprint, ncool, npur,
         timestep, T_start, kpi[], kpa[], kneg[], khet[], het_window[], kpur_end[],
         do_exp_cool, do_movie_output, verbose, c_designed_seq
     )
