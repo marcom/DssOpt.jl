@@ -79,7 +79,7 @@ function opt_md(target_dbn::AbstractString;
 
     vienna = target_dbn
     c_designed_seq = Ptr{Ptr{UInt8}}(Libc.malloc(length(vienna) + 1))
-    ret = Int(GC.@preserve seq_constraints_hard LibDssOpt.run_md(
+    ret = Int(GC.@preserve c_designed_seq seq_constraints_hard LibDssOpt.run_md(
         vienna, c_seq_constraints_hard, nsteps, nprint, ncool, npur,
         timestep, T_start, kpi[], kpa[], kneg[], khet[], het_window[], kpur_end[],
         do_exp_cool, do_movie_output, verbose, c_designed_seq
@@ -140,7 +140,7 @@ function opt_sd(target_dbn::AbstractString;
 
     vienna = target_dbn
     c_designed_seq = Ptr{Ptr{UInt8}}(Libc.malloc(length(vienna) + 1))
-    ret = Int(LibDssOpt.run_sd(
+    ret = Int(GC.@preserve c_designed_seq LibDssOpt.run_sd(
         vienna, maxsteps, nprint, wiggle, kpi[], kpa[], kpur[],
         kneg[], khet[], het_window[], do_movie_output, verbose,
         c_designed_seq
