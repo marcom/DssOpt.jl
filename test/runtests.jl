@@ -7,6 +7,7 @@ showtestset() = println(" "^(2 * Test.get_testset_depth()), "testing ",
 
 @testset verbose=true "DssOpt" begin
     showtestset()
+    include("aqua.jl")
     include("opt.jl")
     include("exe.jl")
 end

@@ -8,14 +8,16 @@ CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 DssOpt_jll = "2c93a0bb-ae27-5046-8047-3b3578ee1502"
 
 [compat]
+Aqua = "0.6"
 CEnum = "0.4"
 DssOpt_jll = "=1.0.4"
 FoldRNA = "0.2"
 julia = "1.6"
 
 [extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 FoldRNA = "c54b6bf2-3650-4185-8b5f-4b1290dd1f68"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["FoldRNA", "Test"]
+test = ["Aqua", "FoldRNA", "Test"]
