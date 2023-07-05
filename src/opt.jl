@@ -2,18 +2,43 @@
 
 export opt_md
 
-# TODO
-# - seq_constraints_hard
-# - set force constants
-#    kpi = kpa = kneg = kpur_end = khet = Cdouble(0.0)
-#    het_window = Cuint(0)
-#    set_dss_force_constants_defaults(kpi, kpa, kneg, kpur_end, khet, het_window)
+"""
+    opt_md(target_dbn; kwargs...) -> String
+
+Perform RNA sequence optimisation for a target structure `target_dbn`
+given in dot-bracket notation.
+
+The sequence optimisation is performed by optimising a base
+composition at each position of the sequence with a differentiable
+design score function.  The gradients with respect to sequence
+composition are used to perform dynamical simulated annealing in
+sequence space, i.e. the gradients are used to compute forces in
+sequence space, and the resulting equations of (sequence) motion are
+numerically integrated.  The sequence velocities are coupled by a
+thermostat to a heat bath which is slowly cooled, yielding physically
+realisable sequence compositions (one component is 100%, and all
+others are at 0%) at the end of the optimisation.
+
+Keyword arguments:
+
+- `seq_constraints_hard`: hard sequence constraints for the designed sequence
+- `time_total`: the total time
+- `time_print`: time between printing in verbose mode
+- `time_cool`: time at which the cooling process starts
+- `time_pur`: time from when purification terms are turned on
+- `T_start`: sequence temperature at the beginning of the optimisation
+- `do_exp_cool`: do exponential cooling, otherwise linear cooling is used
+- `verbose`: verbose output
+
+Examples
+--------
+```julia
+opt_md("(((...)))")
+opt_md("(((...)))"; seq_constraints_hard="GNNUNNNNC")
+```
+"""
 function opt_md(target_dbn::AbstractString;
                 seq_constraints_hard::Union{AbstractString,Nothing} = nothing,
-                # nsteps = 100,
-                # nprint = 10,
-                # ncool = 50,
-                # npur = 100,
                 time_total::Real = 50.0,
                 time_print::Real = 2.5,
                 time_cool::Real = 0.1 * time_total,

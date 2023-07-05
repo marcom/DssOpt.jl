@@ -18,13 +18,19 @@ using DssOpt
 
 # dynamics in sequence space optimisation with dynamical simulated
 # annealing
+
 opt_md("(((...)))")
 opt_md("(((...)))"; verbose=true)
 
 
 # steepest descent optimisiation
 
-```julia
 opt_sd("(((...)))")
 opt_sd_gsl("(((...)))")
 ```
+
+## References
+
+Matthies, Bienert, Torda. Dynamics in sequence space for RNA secondary
+structure design, JCTC, 3663 -- 3670, 2012.
+https://doi.org/10.1021/ct300267j
