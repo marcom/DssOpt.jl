@@ -26,3 +26,12 @@ end
     # TODO: currently exits the program: ERROR: illegal base pair (G0, G8) cannot be satisfied.
     # @test_throws ArgumentError opt_md("(((...)))"; seq_constraints_hard="GNNNNNNNG")
 end
+
+@testset "opt_sd" begin
+    showtestset()
+    for target_dbn in ["(((...)))", "(((((...))).(...)))"]
+        seq = opt_sd(target_dbn)
+        @test seq isa String
+        @test length(seq) == length(target_dbn)
+    end
+end

@@ -1,6 +1,6 @@
-# call the optimisation functions `run_md`, `run_sd`
+# call the sequence optimisation functions `run_md`, `run_sd`
 
-export opt_md
+export opt_md, opt_sd
 
 """
     opt_md(target_dbn; kwargs...) -> String
@@ -92,3 +92,63 @@ function opt_md(target_dbn::AbstractString;
     return designed_seq
 end
 
+
+"""
+    opt_sd(target_dbn; kwargs...) -> String
+
+Perform RNA sequence optimisation for a target structure `target_dbn`
+given in dot-bracket notation.
+
+The sequence optimisation is performed by optimising a base
+composition at each position of the sequence with a differentiable
+design score function.  The sequence compositions are optimised via
+steepest descent on the design score function.
+
+Keyword arguments:
+
+- `maxsteps`: maximum number of gradient steps
+- `nprint`: interval to print details in verbose mode
+- `wiggle`: scaling factor for random perturbation to starting sequence composition (all bases 25%)
+- `verbose`: verbose output
+
+Example
+-------
+```julia
+opt_sd("(((...)))")
+```
+"""
+function opt_sd(target_dbn::AbstractString;
+                maxsteps::Integer = 20000,
+                nprint::Integer = 1000,
+                wiggle::Real = 0.1,
+                # kpi = 50.0,
+                # kpa = 50.0,
+                # kneg = 50.0,
+                # khet = 50.0,
+                # het_window = 3,
+                # kpur = 20.0,
+                do_movie_output::Bool = false,
+                verbose::Bool = false)
+
+    kpi        = Ref(Cdouble(0.0))
+    kpa        = Ref(Cdouble(0.0))
+    kneg       = Ref(Cdouble(0.0))
+    kpur       = Ref(Cdouble(0.0))
+    khet       = Ref(Cdouble(0.0))
+    het_window = Ref(Cuint(0))
+    LibDssOpt.set_dss_force_constants_defaults(kpi, kpa, kneg, kpur, khet, het_window)
+
+    vienna = target_dbn
+    c_designed_seq = Ptr{Ptr{UInt8}}(Libc.malloc(length(vienna) + 1))
+    ret = Int(LibDssOpt.run_sd(
+        vienna, maxsteps, nprint, wiggle, kpi[], kpa[], kpur[],
+        kneg[], khet[], het_window[], do_movie_output, verbose,
+        c_designed_seq
+    ))
+    if ret != 0
+        error("optimisation unstable, decrease timestep and/or increase force constants")
+    end
+    designed_seq = unsafe_string(unsafe_load(c_designed_seq))
+    Libc.free(c_designed_seq)
+    return designed_seq
+end
