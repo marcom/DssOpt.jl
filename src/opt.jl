@@ -36,12 +36,12 @@ function opt_md(target_dbn::AbstractString;
     npur   = Cuint(round(time_pur   / timestep))
 
     c_seq_constraints_hard = if seq_constraints_hard === nothing
-        Ptr{Int8}(C_NULL)
+        Ptr{UInt8}(C_NULL)
     else
         if length(seq_constraints_hard) != length(target_dbn)
             throw(ArgumentError("target_dbn and seq_constraints_hard must have same length"))
         end
-        Base.unsafe_convert(Ptr{Int8}, seq_constraints_hard)::Ptr{Int8}
+        pointer(seq_constraints_hard)::Ptr{UInt8}
     end
 
     kpi        = Ref(Cdouble(0.0))
@@ -54,11 +54,11 @@ function opt_md(target_dbn::AbstractString;
 
     vienna = target_dbn
     c_designed_seq = Ptr{Ptr{UInt8}}(Libc.malloc(length(vienna) + 1))
-    ret = LibDssOpt.run_md(
+    ret = Int(GC.@preserve seq_constraints_hard LibDssOpt.run_md(
         vienna, c_seq_constraints_hard, nsteps, nprint, ncool, npur,
         timestep, T_start, kpi[], kpa[], kneg[], khet[], het_window[], kpur_end[],
         do_exp_cool, do_movie_output, verbose, c_designed_seq
-    )
+    ))
     if ret != 0
         error("optimisation unstable, decrease timestep and/or increase force constants")
     end
