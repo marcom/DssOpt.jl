@@ -29,8 +29,6 @@ open("./prologue.jl", "w") do io
     println(io, "const UINT_MAX = typemax(Cuint)")
     println(io)
     println(io, "# package versions used to generate this file")
-    # println(io, "const VERSION_GEN_Clang = v\"", version_Clang, "\"")
-    # println(io, "const VERSION_GEN_DssOpt_jll = v\"", version_DssOpt_jll, "\"")
     println(io, "const VERSION_GEN_Clang = $(repr(version_Clang))")
     println(io, "const VERSION_GEN_DssOpt_jll = $(repr(version_DssOpt_jll))")
     println(io)
