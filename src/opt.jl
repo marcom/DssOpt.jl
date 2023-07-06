@@ -126,6 +126,7 @@ opt_sd("(((...)))")
 ```
 """
 function opt_sd(target_dbn::AbstractString;
+                seed::Union{Integer,Nothing} = nothing,
                 maxsteps::Integer = 20000,
                 nprint::Integer = 1000,
                 wiggle::Real = 0.1,
@@ -145,6 +146,13 @@ function opt_sd(target_dbn::AbstractString;
     khet       = Ref(Cdouble(0.0))
     het_window = Ref(Cuint(0))
     LibDssOpt.set_dss_force_constants_defaults(kpi, kpa, kneg, kpur, khet, het_window)
+
+    c_seed = if seed === nothing
+        LibDssOpt.random_get_seedval_from_current_time()
+    else
+        c_seed = Cuint(seed % Cuint)
+    end
+    LibDssOpt.random_seed(c_seed)
 
     vienna = target_dbn
     c_designed_seq = Ptr{Ptr{UInt8}}(Libc.malloc(length(vienna) + 1))
