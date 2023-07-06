@@ -21,6 +21,7 @@ others are at 0%) at the end of the optimisation.
 
 Keyword arguments:
 
+- `seed`: seed value for random number generator, uses current time if unset
 - `seq_constraints_hard`: hard sequence constraints for the designed sequence
 - `time_total`: the total time
 - `time_print`: time between printing in verbose mode
@@ -38,8 +39,8 @@ opt_md("(((...)))"; seq_constraints_hard="GNNUNNNNC")
 ```
 """
 function opt_md(target_dbn::AbstractString;
-                seq_constraints_hard::Union{AbstractString,Nothing} = nothing,
                 seed::Union{Integer,Nothing} = nothing,
+                seq_constraints_hard::Union{AbstractString,Nothing} = nothing,
                 time_total::Real = 50.0,
                 time_print::Real = 2.5,
                 time_cool::Real = 0.1 * time_total,
@@ -76,6 +77,9 @@ function opt_md(target_dbn::AbstractString;
         c_seed = Cuint(seed % Cuint)
     end
     LibDssOpt.random_seed(c_seed)
+    if verbose
+        println("seed = ", c_seed)
+    end
 
     kpi        = Ref(Cdouble(0.0))
     kpa        = Ref(Cdouble(0.0))
@@ -114,6 +118,7 @@ steepest descent on the design score function.
 
 Keyword arguments:
 
+- `seed`: seed value for random number generator, uses current time if unset
 - `maxsteps`: maximum number of gradient steps
 - `nprint`: interval to print details in verbose mode
 - `wiggle`: scaling factor for random perturbation to starting sequence composition (all bases 25%)
@@ -153,6 +158,9 @@ function opt_sd(target_dbn::AbstractString;
         c_seed = Cuint(seed % Cuint)
     end
     LibDssOpt.random_seed(c_seed)
+    if verbose
+        println("seed = ", c_seed)
+    end
 
     vienna = target_dbn
     c_designed_seq = Ptr{Ptr{UInt8}}(Libc.malloc(length(vienna) + 1))
