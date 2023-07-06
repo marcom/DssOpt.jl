@@ -23,6 +23,9 @@ end
     for target_dbn in ["(((...)))", "(((((...))).(...)))"]
         seq = opt_md(target_dbn)
         test_seq(seq, target_dbn)
+        # seed
+        seq = opt_md(target_dbn; seed=rand(UInt))
+        test_seq(seq, target_dbn)
     end
 end
 

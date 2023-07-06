@@ -39,6 +39,7 @@ opt_md("(((...)))"; seq_constraints_hard="GNNUNNNNC")
 """
 function opt_md(target_dbn::AbstractString;
                 seq_constraints_hard::Union{AbstractString,Nothing} = nothing,
+                seed::Union{Integer,Nothing} = nothing,
                 time_total::Real = 50.0,
                 time_print::Real = 2.5,
                 time_cool::Real = 0.1 * time_total,
@@ -68,6 +69,13 @@ function opt_md(target_dbn::AbstractString;
         end
         pointer(seq_constraints_hard)::Ptr{UInt8}
     end
+
+    c_seed = if seed === nothing
+        LibDssOpt.random_get_seedval_from_current_time()
+    else
+        c_seed = Cuint(seed % Cuint)
+    end
+    LibDssOpt.random_seed(c_seed)
 
     kpi        = Ref(Cdouble(0.0))
     kpa        = Ref(Cdouble(0.0))
