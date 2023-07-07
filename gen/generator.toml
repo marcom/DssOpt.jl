@@ -5,3 +5,5 @@ module_name = "LibDssOpt"
 jll_pkg_name = "DssOpt_jll"
 #export_symbol_prefixes = ["dss_"]
 prologue_file_path = "./prologue.jl"
+extract_c_comment_style = "raw"
+show_c_function_prototype = true

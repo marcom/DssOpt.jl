@@ -45,6 +45,7 @@ args = get_default_args()
 append!(args, [
     "-I$include_dir",
     "-std=c99",
+    "-fparse-all-comments",
 ])
 
 accept_headers = [
