@@ -90,7 +90,7 @@ function opt_md(target_dbn::AbstractString;
     LibDssOpt.set_dss_force_constants_defaults(kpi, kpa, kneg, kpur_end, khet, het_window)
 
     vienna = target_dbn
-    c_designed_seq = Ptr{Ptr{UInt8}}(Libc.malloc(length(vienna) + 1))
+    c_designed_seq = [zeros(UInt8, length(vienna) + 1)]
     ret = Int(GC.@preserve c_designed_seq seq_constraints_hard LibDssOpt.run_md(
         vienna, c_seq_constraints_hard, nsteps, nprint, ncool, npur,
         timestep, T_start, kpi[], kpa[], kneg[], khet[], het_window[], kpur_end[],
@@ -99,8 +99,7 @@ function opt_md(target_dbn::AbstractString;
     if ret != 0
         error("optimisation unstable, decrease timestep and/or increase force constants")
     end
-    designed_seq = unsafe_string(unsafe_load(c_designed_seq))
-    Libc.free(c_designed_seq)
+    designed_seq = String(c_designed_seq[1][1:length(vienna)])
     return designed_seq
 end
 
@@ -163,7 +162,7 @@ function opt_sd(target_dbn::AbstractString;
     end
 
     vienna = target_dbn
-    c_designed_seq = Ptr{Ptr{UInt8}}(Libc.malloc(length(vienna) + 1))
+    c_designed_seq = [zeros(UInt8, length(vienna) + 1)]
     ret = Int(GC.@preserve c_designed_seq LibDssOpt.run_sd(
         vienna, maxsteps, nprint, wiggle, kpi[], kpa[], kpur[],
         kneg[], khet[], het_window[], do_movie_output, verbose,
@@ -172,7 +171,6 @@ function opt_sd(target_dbn::AbstractString;
     if ret != 0
         error("optimisation unstable, decrease timestep and/or increase force constants")
     end
-    designed_seq = unsafe_string(unsafe_load(c_designed_seq))
-    Libc.free(c_designed_seq)
+    designed_seq = String(c_designed_seq[1][1:length(vienna)])
     return designed_seq
 end
