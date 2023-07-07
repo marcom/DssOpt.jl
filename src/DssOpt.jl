@@ -8,6 +8,7 @@ include("../lib/LibDssOpt.jl")
 import .LibDssOpt
 
 include("opt.jl")
+include("random.jl")
 include("exe.jl")
 
 end # module

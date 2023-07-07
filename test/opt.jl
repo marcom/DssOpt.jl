@@ -1,23 +1,3 @@
-using FoldRNA: Pairtable, isunpaired, isbpopening, isbpclosing
-const LEGALPAIRS = ("AU", "UA", "GC", "CG", "GU", "UG")
-
-function test_seq(seq, dbn)
-    @test seq isa String
-    @test length(seq) == length(dbn)
-    @test all(b -> b ∈ "ACGU", seq)
-    # test that all basepairs are legal
-    pt = Pairtable(dbn)
-    @test all(1:length(dbn)) do i
-        if isunpaired(pt, i) || isbpclosing(pt, i)
-            return true
-        elseif isbpopening(pt, i)
-            return seq[i] * seq[pt.pairs[i]] ∈ LEGALPAIRS
-        else
-            error("shouldn't be possible")
-        end
-    end
-end
-
 @testset "opt_md" begin
     showtestset()
     for target_dbn in ["(((...)))", "(((((...))).(...)))"]
