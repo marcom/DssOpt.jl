@@ -7,6 +7,7 @@ function random_seq(dbn::AbstractString)
     n = length(dbn)
     pairs = Ptr{Cuint}(Libc.malloc(n * sizeof(Cuint)))
     useq = Ptr{Cuint}(Libc.malloc(n * sizeof(Cuint)))
+    # TODO: next version, use vienna_to_pairs function
     LibDssOpt.xvienna_to_pairs(n, dbn, pairs)
     # TODO: next version of dss-opt this function is called random_useq
     LibDssOpt.random_seq(n, pairs, useq)
