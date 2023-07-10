@@ -47,15 +47,23 @@ function opt_md(target_dbn::AbstractString;
                 time_pur::Real = 0.8 * time_total,
                 timestep::Real = 0.0015,
                 T_start::Real = 40.0,
-                # kpi = 50.0,
-                # kpa = 50.0,
-                # kneg = 50.0,
-                # khet = 50.0,
-                # het_window = 3,
-                # kpur_end = 20.0,
+                kpi::Real = LibDssOpt.DEFAULT_DSSOPT_kpi,
+                kpa::Real = LibDssOpt.DEFAULT_DSSOPT_kpa,
+                kneg::Real = LibDssOpt.DEFAULT_DSSOPT_kneg,
+                khet::Real = LibDssOpt.DEFAULT_DSSOPT_khet,
+                het_window::Integer = LibDssOpt.DEFAULT_DSSOPT_het_window,
+                kpur_end::Real = LibDssOpt.DEFAULT_DSSOPT_kpur,
                 do_exp_cool::Bool = false,
                 do_movie_output::Bool = false,
                 verbose::Bool = false)
+
+    # TODO: check that any time_* == 0 makes sense
+    time_total >= 0 || throw(ArgumentError("time_total must be >= 0"))
+    time_print >= 0 || throw(ArgumentError("time_print must be >= 0"))
+    time_cool >= 0 || throw(ArgumentError("time_cool must be >= 0"))
+    time_pur >= 0 || throw(ArgumentError("time_pur must be >= 0"))
+    # TODO: check that het_window == 0 makes sense
+    het_window >= 0 || throw(ArgumentError("het_window must be >= 0"))
 
     nsteps = Cuint(round(time_total / timestep))
     nprint = Cuint(round(time_print / timestep))
@@ -80,14 +88,6 @@ function opt_md(target_dbn::AbstractString;
     if verbose
         println("seed = ", c_seed)
     end
-
-    kpi        = Ref(Cdouble(0.0))
-    kpa        = Ref(Cdouble(0.0))
-    kneg       = Ref(Cdouble(0.0))
-    kpur_end   = Ref(Cdouble(0.0))
-    khet       = Ref(Cdouble(0.0))
-    het_window = Ref(Cuint(0))
-    LibDssOpt.set_dss_force_constants_defaults(kpi, kpa, kneg, kpur_end, khet, het_window)
 
     vienna = target_dbn
     c_designed_seq = [zeros(UInt8, length(vienna) + 1)]
@@ -131,25 +131,24 @@ opt_sd("(((...)))")
 """
 function opt_sd(target_dbn::AbstractString;
                 seed::Union{Integer,Nothing} = nothing,
+                # TODO: defaults for maxsteps, nprint, wiggle taken
+                #       from dss-opt/main-opt-sd.c
                 maxsteps::Integer = 20000,
                 nprint::Integer = 1000,
                 wiggle::Real = 0.1,
-                # kpi = 50.0,
-                # kpa = 50.0,
-                # kneg = 50.0,
-                # khet = 50.0,
-                # het_window = 3,
-                # kpur = 20.0,
+                kpi::Real = LibDssOpt.DEFAULT_DSSOPT_kpi,
+                kpa::Real = LibDssOpt.DEFAULT_DSSOPT_kpa,
+                kneg::Real = LibDssOpt.DEFAULT_DSSOPT_kneg,
+                khet::Real = LibDssOpt.DEFAULT_DSSOPT_khet,
+                het_window::Integer = LibDssOpt.DEFAULT_DSSOPT_het_window,
+                kpur::Real = LibDssOpt.DEFAULT_DSSOPT_kpur,
                 do_movie_output::Bool = false,
                 verbose::Bool = false)
 
-    kpi        = Ref(Cdouble(0.0))
-    kpa        = Ref(Cdouble(0.0))
-    kneg       = Ref(Cdouble(0.0))
-    kpur       = Ref(Cdouble(0.0))
-    khet       = Ref(Cdouble(0.0))
-    het_window = Ref(Cuint(0))
-    LibDssOpt.set_dss_force_constants_defaults(kpi, kpa, kneg, kpur, khet, het_window)
+    maxsteps >= 0 || throw(ArgumentError("maxsteps must be >= 0"))
+    nprint >= 0 || throw(ArgumentError("nprint must be >= 0"))
+    # TODO: check that het_window == 0 makes sense
+    het_window >= 0 || throw(ArgumentError("het_window must be >= 0"))
 
     c_seed = if seed === nothing
         LibDssOpt.random_get_seedval_from_current_time()
