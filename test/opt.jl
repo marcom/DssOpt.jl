@@ -25,11 +25,22 @@ end
     @test_throws ArgumentError opt_md("(((...)))"; seq_constraints_hard="NNN")
     # illegal bases
     @test_throws ArgumentError redirect_stdout(devnull) do
-        opt_md("(((...)))"; seq_constraints_hard="NNNAAAHHH")
+        try
+            opt_md("(((...)))"; seq_constraints_hard="NNNAAAHHH")
+        catch
+            # flush here, otherwise the leftovers appear later
+            Libc.flush_cstdio()
+            rethrow()
+        end
     end
     # illegal basepair
     @test_throws ArgumentError redirect_stdout(devnull) do
-        opt_md("(((...)))"; seq_constraints_hard="GNNNNNNNG")
+        try
+            opt_md("(((...)))"; seq_constraints_hard="GNNNNNNNG")
+        catch
+            Libc.flush_cstdio()
+            rethrow()
+        end
     end
 end
 
