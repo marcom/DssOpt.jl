@@ -1,8 +1,9 @@
 # call the sequence optimisation functions `run_md`, `run_sd`
 
-export opt_md, opt_sd
+export opt_md, opt_sd, movie_capture
 
 using DssOpt.LibDssOpt: C_EXIT_SUCCESS
+import IOCapture
 
 function isok_seq_constraints_hard(seq_constraints_hard::AbstractString, target_dbn::AbstractString)
     nseq = length(seq_constraints_hard)
@@ -200,4 +201,79 @@ function opt_sd(target_dbn::AbstractString;
     end
     designed_seq = String(c_designed_seq[1][1:length(vienna)])
     return designed_seq
+end
+
+"""
+    movie_capture(opt_fn, target_dbn, args...; verbose, kwargs...) -> (; final_seq, seqs, pseqs)
+
+Capture "movie output" of optimisation function `opt_fn` for target
+secondary structure `target_dbn`.
+
+Examples
+--------
+```julia
+movie_capture(opt_md, "(((...)))"; seq_constraints_hard="NNGUUUUNN")
+movie_capture(opt_sd, "(((...)))")
+```
+"""
+function movie_capture(opt_fn, target_dbn, args...; verbose::Bool=false, kwargs...)
+    function process_out(movie_output::AbstractString)
+        lines = readlines(IOBuffer(movie_output))
+        if length(lines) < 2
+            error("Movie output too short, only $(length(lines)) lines. " *
+                  "Movie output:\n$movie_output")
+        end
+        n = length(target_dbn)
+        nbases = length(split(lines[2]))
+        nlines = length(lines)
+        # each frame has
+        # - a line with the sequence (choosing max prob at each site)
+        # - `n` lines, on each line the probabilities at this site
+        #   (e.g. 4 probabilities for A, C, G, U) separated by spaces
+        nlines_per_frame = n + 1
+        if nlines % nlines_per_frame != 0
+            println(movie_output)
+            error("Movie output has wrong length. " *
+                "Got $nlines of output, expecting $nlines_per_frame lines per frame")
+        end
+        nframes = Int(nlines / nlines_per_frame)
+        seqs = String[]
+        pseqs = zeros(nbases, n, nframes)
+        # k: frame number
+        # i: line number
+        for k_frame = 1:nframes
+            i = (k_frame - 1) * nlines_per_frame + 1
+            i_end = i + nlines_per_frame - 1
+            push!(seqs, lines[i])
+            seqpos = 1
+            for j = i+1:i_end
+                pseqs[:, seqpos, k_frame] .= parse.(Float64, split(lines[j]))
+                seqpos += 1
+            end
+        end
+        return seqs, pseqs
+    end
+    if length(target_dbn) == 0
+        throw(ArgumentError("target_dbn is empty"))
+    end
+    cap = IOCapture.capture() do
+        ret = opt_fn(target_dbn, args...; do_movie_output=true, verbose, kwargs...)
+        Libc.flush_cstdio()  # otherwise output is lost
+        ret
+    end
+    final_seq = cap.value::String
+    out = cap.output::String
+    # movie output is between START and END markers in verbose mode,
+    # otherwise all output is movie output
+    if verbose
+        regex = r"START\n(.*)END\n"s
+        m = match(regex, out)
+        if m != nothing
+            out = m.captures[1]
+        else
+            error("Could not find movie output")
+        end
+    end
+    seqs, pseqs = process_out(out)
+    return (; final_seq, seqs, pseqs)
 end
