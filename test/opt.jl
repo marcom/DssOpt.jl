@@ -24,9 +24,13 @@ end
     @test_throws ArgumentError opt_md("(((...)))"; seq_constraints_hard="")
     @test_throws ArgumentError opt_md("(((...)))"; seq_constraints_hard="NNN")
     # illegal bases
-    @test_throws ArgumentError opt_md("(((...)))"; seq_constraints_hard="NNNAAAHHH")
+    @test_throws ArgumentError redirect_stdout(devnull) do
+        opt_md("(((...)))"; seq_constraints_hard="NNNAAAHHH")
+    end
     # illegal basepair
-    @test_throws ArgumentError opt_md("(((...)))"; seq_constraints_hard="GNNNNNNNG")
+    @test_throws ArgumentError redirect_stdout(devnull) do
+        opt_md("(((...)))"; seq_constraints_hard="GNNNNNNNG")
+    end
 end
 
 @testset "opt_sd" begin
