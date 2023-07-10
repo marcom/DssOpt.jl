@@ -716,16 +716,16 @@ function xpairs_to_vienna(n, pairs, vienna)
 end
 
 """
-    xstr_to_seq(n, str, seq)
+    xstr_to_useq(n, str, useq)
 
 
 ### Prototype
 ```c
-void xstr_to_seq(uint n, const char *str, uint *seq);
+void xstr_to_useq(uint n, const char *str, uint *useq);
 ```
 """
-function xstr_to_seq(n, str, seq)
-    ccall((:xstr_to_seq, libdssopt), Cvoid, (uint, Ptr{Cchar}, Ptr{uint}), n, str, seq)
+function xstr_to_useq(n, str, useq)
+    ccall((:xstr_to_useq, libdssopt), Cvoid, (uint, Ptr{Cchar}, Ptr{uint}), n, str, useq)
 end
 
 """
@@ -752,6 +752,32 @@ void pseq_to_str(double **p, uint n, uint ndim, char *str);
 """
 function pseq_to_str(p, n, ndim, str)
     ccall((:pseq_to_str, libdssopt), Cvoid, (Ptr{Ptr{Cdouble}}, uint, uint, Ptr{Cchar}), p, n, ndim, str)
+end
+
+"""
+    xuseq_to_str(n, useq, str)
+
+
+### Prototype
+```c
+void xuseq_to_str(uint n, const uint *useq, char *str);
+```
+"""
+function xuseq_to_str(n, useq, str)
+    ccall((:xuseq_to_str, libdssopt), Cvoid, (uint, Ptr{uint}, Ptr{Cchar}), n, useq, str)
+end
+
+"""
+    useq_to_str(n, useq, verbose, str)
+
+
+### Prototype
+```c
+int useq_to_str(uint n, const uint *useq, bool verbose, char *str);
+```
+"""
+function useq_to_str(n, useq, verbose, str)
+    ccall((:useq_to_str, libdssopt), Cint, (uint, Ptr{uint}, Bool, Ptr{Cchar}), n, useq, verbose, str)
 end
 
 """
