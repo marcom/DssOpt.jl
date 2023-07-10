@@ -14,6 +14,8 @@ const UINT_MAX = typemax(Cuint)
 const VERSION_GEN_Clang = v"0.17.6"
 const VERSION_GEN_DssOpt_jll = v"1.0.5+0"
 
+const C_EXIT_SUCCESS = 0
+
 #### end prologue.jl
 
 

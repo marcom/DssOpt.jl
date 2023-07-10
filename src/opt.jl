@@ -2,6 +2,8 @@
 
 export opt_md, opt_sd
 
+using DssOpt.LibDssOpt: C_EXIT_SUCCESS
+
 function isok_seq_constraints_hard(seq_constraints_hard::AbstractString, target_dbn::AbstractString)
     nseq = length(seq_constraints_hard)
     ndbn = length(target_dbn)
@@ -13,7 +15,7 @@ function isok_seq_constraints_hard(seq_constraints_hard::AbstractString, target_
     pairs = zeros(Cuint, n)
     verbose_v2p = true
     retcode_v2p = LibDssOpt.vienna_to_pairs(n, target_dbn, verbose_v2p, pairs)
-    if retcode_v2p != 0 # TODO: != C_EXIT_SUCCESS
+    if retcode_v2p != C_EXIT_SUCCESS
         throw(ArgumentError("not a well formed secondary structure: $target_dbn"))
     end
     # now try to parse seq_constraints_hard
@@ -22,7 +24,7 @@ function isok_seq_constraints_hard(seq_constraints_hard::AbstractString, target_
     constraint_str = seq_constraints_hard
     verbose = true
     retcode = LibDssOpt.parse_seq_constraints_hard(n, hard, n_hard, constraint_str, verbose, pairs)
-    if retcode == 0 # TODO: == C_EXIT_SUCCESS
+    if retcode == C_EXIT_SUCCESS
         return true
     end
     return false

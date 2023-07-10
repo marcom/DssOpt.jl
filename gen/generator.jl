@@ -32,6 +32,8 @@ open("./prologue.jl", "w") do io
     println(io, "const VERSION_GEN_Clang = $(repr(version_Clang))")
     println(io, "const VERSION_GEN_DssOpt_jll = $(repr(version_DssOpt_jll))")
     println(io)
+    println(io, "const C_EXIT_SUCCESS = 0")
+    println(io)
     println(io, "#### end prologue.jl")
 end
 
