@@ -2,6 +2,32 @@
 
 export opt_md, opt_sd
 
+function isok_seq_constraints_hard(seq_constraints_hard::AbstractString, target_dbn::AbstractString)
+    nseq = length(seq_constraints_hard)
+    ndbn = length(target_dbn)
+    if nseq != ndbn
+        throw(ArgumentError("seq_constraints_hard and target_dbn must have same length, $nseq != $ndbn"))
+    end
+    n = nseq
+    # create pairs
+    pairs = zeros(Cuint, n)
+    verbose_v2p = true
+    retcode_v2p = LibDssOpt.vienna_to_pairs(n, target_dbn, verbose_v2p, pairs)
+    if retcode_v2p != 0 # TODO: != C_EXIT_SUCCESS
+        throw(ArgumentError("not a well formed secondary structure: $target_dbn"))
+    end
+    # now try to parse seq_constraints_hard
+    hard = zeros(Cuint, n)
+    n_hard = Ref(Cuint(0))
+    constraint_str = seq_constraints_hard
+    verbose = true
+    retcode = LibDssOpt.parse_seq_constraints_hard(n, hard, n_hard, constraint_str, verbose, pairs)
+    if retcode == 0 # TODO: == C_EXIT_SUCCESS
+        return true
+    end
+    return false
+end
+
 """
     opt_md(target_dbn; kwargs...) -> String
 
@@ -73,8 +99,8 @@ function opt_md(target_dbn::AbstractString;
     c_seq_constraints_hard = if seq_constraints_hard === nothing
         Ptr{UInt8}(C_NULL)
     else
-        if length(seq_constraints_hard) != length(target_dbn)
-            throw(ArgumentError("target_dbn and seq_constraints_hard must have same length"))
+        if !isok_seq_constraints_hard(seq_constraints_hard, target_dbn)
+            throw(ArgumentError("Illegal seq_constraints_hard: $seq_constraints_hard"))
         end
         pointer(seq_constraints_hard)::Ptr{UInt8}
     end
@@ -168,7 +194,7 @@ function opt_sd(target_dbn::AbstractString;
         c_designed_seq
     ))
     if ret != 0
-        error("optimisation unstable, decrease timestep and/or increase force constants")
+        error("optimisation unstable, decrease force constants and/or decrease stepsize")
     end
     designed_seq = String(c_designed_seq[1][1:length(vienna)])
     return designed_seq
