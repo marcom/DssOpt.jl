@@ -12,7 +12,7 @@ const UINT_MAX = typemax(Cuint)
 
 # package versions used to generate this file
 const VERSION_GEN_Clang = v"0.17.6"
-const VERSION_GEN_DssOpt_jll = v"1.0.4+0"
+const VERSION_GEN_DssOpt_jll = v"1.0.5+0"
 
 #### end prologue.jl
 
@@ -135,8 +135,8 @@ function xmalloc(size)
 end
 
 """
-TODO: some not needed for C99/C++ ?, maybe should be defined
-conditionally 
+TODO: some typedefs not needed for C99/C++ ?, maybe should be
+defined conditionally 
 """
 const uchar = Cuchar
 
@@ -259,7 +259,7 @@ end
 
 ### Prototype
 ```c
-uint x_parse_seq_constraints_hard(uint n, uint *hard, char *constraint_str, uint *pairs);
+uint x_parse_seq_constraints_hard(uint n, uint *hard, const char *constraint_str, const uint *pairs);
 ```
 """
 function x_parse_seq_constraints_hard(n, hard, constraint_str, pairs)
@@ -267,12 +267,26 @@ function x_parse_seq_constraints_hard(n, hard, constraint_str, pairs)
 end
 
 """
-    run_md(vienna, seq_constraints_hard, nsteps, nprint, ncool, npur, timestep, T_start, kpi, kpa, kneg, khet, het_window, kpur_end, do_exp_cool, do_movie_output, verbose, designed_seq)
+    parse_seq_constraints_hard(n, hard, n_hard, constraint_str, verbose, pairs)
 
 
 ### Prototype
 ```c
-int run_md(char *vienna, char *seq_constraints_hard, uint nsteps, uint nprint, uint ncool, uint npur, double timestep, double T_start, double kpi, double kpa, double kneg, double khet, uint het_window, double kpur_end, bool do_exp_cool, bool do_movie_output, bool verbose, char **designed_seq);
+int parse_seq_constraints_hard(uint n, uint *hard, uint *n_hard, const char *constraint_str, bool verbose, const uint *pairs);
+```
+"""
+function parse_seq_constraints_hard(n, hard, n_hard, constraint_str, verbose, pairs)
+    ccall((:parse_seq_constraints_hard, libdssopt), Cint, (uint, Ptr{uint}, Ptr{uint}, Ptr{Cchar}, Bool, Ptr{uint}), n, hard, n_hard, constraint_str, verbose, pairs)
+end
+
+"""
+    run_md(vienna, seq_constraints_hard, nsteps, nprint, ncool, npur, timestep, T_start, kpi, kpa, kneg, khet, het_window, kpur_end, do_exp_cool, do_movie_output, verbose, designed_seq)
+
+run sequence optimisation by dynamics in sequence space (dynamical
+simulated annealing) 
+### Prototype
+```c
+int run_md(const char *vienna, const char *seq_constraints_hard, uint nsteps, uint nprint, uint ncool, uint npur, double timestep, double T_start, double kpi, double kpa, double kneg, double khet, uint het_window, double kpur_end, bool do_exp_cool, bool do_movie_output, bool verbose, char ** const designed_seq);
 ```
 """
 function run_md(vienna, seq_constraints_hard, nsteps, nprint, ncool, npur, timestep, T_start, kpi, kpa, kneg, khet, het_window, kpur_end, do_exp_cool, do_movie_output, verbose, designed_seq)
@@ -282,10 +296,10 @@ end
 """
     run_sd(vienna, maxsteps, nprint, wiggle, kpi, kpa, kpur, kneg, khet, het_window, do_movie_output, verbose, designed_seq)
 
-
+run sequence optimisation by steepest descent 
 ### Prototype
 ```c
-int run_sd(char *vienna, uint maxsteps, uint nprint, double wiggle, double kpi, double kpa, double kpur, double kneg, double khet, uint het_window, bool do_movie_output, bool verbose, char **designed_seq);
+int run_sd(const char *vienna, uint maxsteps, uint nprint, double wiggle, double kpi, double kpa, double kpur, double kneg, double khet, uint het_window, bool do_movie_output, bool verbose, char ** const designed_seq);
 ```
 """
 function run_sd(vienna, maxsteps, nprint, wiggle, kpi, kpa, kpur, kneg, khet, het_window, do_movie_output, verbose, designed_seq)
@@ -501,16 +515,16 @@ function is_bad_bp(seq, i, j)
 end
 
 """
-    show_bad_bp(seq, pairs, n)
+    show_bad_bp(seq, pairs, n, verbose)
 
 
 ### Prototype
 ```c
-void show_bad_bp(char *seq, uint *pairs, size_t n);
+void show_bad_bp(char *seq, uint *pairs, size_t n, bool verbose);
 ```
 """
-function show_bad_bp(seq, pairs, n)
-    ccall((:show_bad_bp, libdssopt), Cvoid, (Ptr{Cchar}, Ptr{uint}, Csize_t), seq, pairs, n)
+function show_bad_bp(seq, pairs, n, verbose)
+    ccall((:show_bad_bp, libdssopt), Cvoid, (Ptr{Cchar}, Ptr{uint}, Csize_t, Bool), seq, pairs, n, verbose)
 end
 
 """
@@ -578,27 +592,6 @@ function set_dss_force_constants_defaults(kpi, kpa, kneg, kpur, khet, het_window
     ccall((:set_dss_force_constants_defaults, libdssopt), Cvoid, (Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{uint}), kpi, kpa, kneg, kpur, khet, het_window)
 end
 
-"""
-    nn_stack
-
-typedef struct {
-uint    nalpha;
-char    *seq_to_char;
-uint8_t *char_to_seq;
-} Alphabet;
-
-typedef struct {
-Alphabet *alpha;
-size_t   len;
-uint8_t  *seq;
-} Seq;
-
-typedef struct {
-Alphabet *alpha;
-size_t   len;
-double   **pseq;
-} Pseq;
-"""
 struct nn_stack
     i1::uint
     j1::uint
@@ -669,6 +662,19 @@ function print_design_score_info_for_seq(inter, seq, n, ndim, K_nj, kpi, kpa, kp
 end
 
 """
+    vienna_to_pairs(n, vienna, verbose, pairs)
+
+
+### Prototype
+```c
+int vienna_to_pairs(uint n, const char *vienna, bool verbose, uint *pairs);
+```
+"""
+function vienna_to_pairs(n, vienna, verbose, pairs)
+    ccall((:vienna_to_pairs, libdssopt), Cint, (uint, Ptr{Cchar}, Bool, Ptr{uint}), n, vienna, verbose, pairs)
+end
+
+"""
     xvienna_to_pairs(n, vienna, pairs)
 
 
@@ -679,6 +685,19 @@ void xvienna_to_pairs(uint n, const char *vienna, uint *pairs);
 """
 function xvienna_to_pairs(n, vienna, pairs)
     ccall((:xvienna_to_pairs, libdssopt), Cvoid, (uint, Ptr{Cchar}, Ptr{uint}), n, vienna, pairs)
+end
+
+"""
+    pairs_to_vienna(n, pairs, verbose, vienna)
+
+
+### Prototype
+```c
+int pairs_to_vienna(uint n, const uint *pairs, bool verbose, char *vienna);
+```
+"""
+function pairs_to_vienna(n, pairs, verbose, vienna)
+    ccall((:pairs_to_vienna, libdssopt), Cint, (uint, Ptr{uint}, Bool, Ptr{Cchar}), n, pairs, verbose, vienna)
 end
 
 """
@@ -799,16 +818,16 @@ function random_pairs(n, pairs, hpmin)
 end
 
 """
-    random_seq(n, pairs, seq)
+    random_useq(n, pairs, useq)
 
 
 ### Prototype
 ```c
-void random_seq(uint n, const uint *pairs, uint *seq);
+void random_useq(uint n, const uint *pairs, uint *useq);
 ```
 """
-function random_seq(n, pairs, seq)
-    ccall((:random_seq, libdssopt), Cvoid, (uint, Ptr{uint}, Ptr{uint}), n, pairs, seq)
+function random_useq(n, pairs, useq)
+    ccall((:random_useq, libdssopt), Cvoid, (uint, Ptr{uint}, Ptr{uint}), n, pairs, useq)
 end
 
 """
@@ -1135,6 +1154,20 @@ void md_integrate_step_leapfrog(uint n, uint ndim, double **r, double **v, doubl
 function md_integrate_step_leapfrog(n, ndim, r, v, gradU, mass, timestep)
     ccall((:md_integrate_step_leapfrog, libdssopt), Cvoid, (uint, uint, Ptr{Ptr{Cdouble}}, Ptr{Ptr{Cdouble}}, Ptr{Ptr{Cdouble}}, Ptr{Cdouble}, Cdouble), n, ndim, r, v, gradU, mass, timestep)
 end
+
+const DEFAULT_DSSOPT_ndim = Cuint(4)
+
+const DEFAULT_DSSOPT_kpi = 50000.0
+
+const DEFAULT_DSSOPT_kpa = 50000.0
+
+const DEFAULT_DSSOPT_kneg = 1.0
+
+const DEFAULT_DSSOPT_kpur = 0.0
+
+const DEFAULT_DSSOPT_khet = 10.0
+
+const DEFAULT_DSSOPT_het_window = Cuint(3)
 
 const NA_UNDEF = UINT_MAX ÷ 2
 
