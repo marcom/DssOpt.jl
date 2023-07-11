@@ -3,7 +3,6 @@
 export opt_md, opt_sd, movie_capture
 
 using DssOpt.LibDssOpt: C_EXIT_SUCCESS
-import IOCapture
 
 function isok_seq_constraints_hard(seq_constraints_hard::AbstractString, target_dbn::AbstractString)
     nseq = length(seq_constraints_hard)
@@ -256,13 +255,17 @@ function movie_capture(opt_fn, target_dbn, args...; verbose::Bool=false, kwargs.
     if length(target_dbn) == 0
         throw(ArgumentError("target_dbn is empty"))
     end
-    cap = IOCapture.capture() do
-        ret = opt_fn(target_dbn, args...; do_movie_output=true, verbose, kwargs...)
-        Libc.flush_cstdio()  # otherwise output is lost
-        ret
+
+    final_seq = ""
+    out = ""
+    mktemp() do path, ios
+        redirect_stdout(ios) do
+            final_seq = opt_fn(target_dbn, args...; do_movie_output=true, verbose, kwargs...)
+            Libc.flush_cstdio()
+        end
+        out = read(path, String)
     end
-    final_seq = cap.value::String
-    out = cap.output::String
+
     # movie output is between START and END markers in verbose mode,
     # otherwise all output is movie output
     if verbose
