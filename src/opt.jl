@@ -30,6 +30,16 @@ function isok_seq_constraints_hard(seq_constraints_hard::AbstractString, target_
     return false
 end
 
+function isok_dbn(dbn::String; verbose::Bool=false)
+    n = length(dbn)
+    pairs = zeros(UInt, n)
+    ret = LibDssOpt.vienna_to_pairs(n, dbn, verbose, pairs)
+    if ret == C_EXIT_SUCCESS
+        return true
+    end
+    return false
+end
+
 """
     opt_md(target_dbn; kwargs...) -> String
 
@@ -85,6 +95,9 @@ function opt_md(target_dbn::AbstractString;
                 do_movie_output::Bool = false,
                 verbose::Bool = false)
 
+    if !isok_dbn(target_dbn; verbose)
+        throw(ArgumentError("Illegal target_dbn: $target_dbn"))
+    end
     # TODO: check that any time_* == 0 makes sense
     time_total >= 0 || throw(ArgumentError("time_total must be >= 0"))
     time_print >= 0 || throw(ArgumentError("time_print must be >= 0"))
@@ -173,6 +186,9 @@ function opt_sd(target_dbn::AbstractString;
                 do_movie_output::Bool = false,
                 verbose::Bool = false)
 
+    if !isok_dbn(target_dbn; verbose)
+        throw(ArgumentError("Illegal target_dbn: $target_dbn"))
+    end
     maxsteps >= 0 || throw(ArgumentError("maxsteps must be >= 0"))
     nprint >= 0 || throw(ArgumentError("nprint must be >= 0"))
     # TODO: check that het_window == 0 makes sense

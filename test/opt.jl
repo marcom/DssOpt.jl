@@ -10,6 +10,9 @@
         # seed
         seq = opt_md(target_dbn; seed=rand(UInt))
         test_seq(seq, target_dbn)
+        # illegal dbn
+        @test_throws ArgumentError opt_md("((...)")
+        @test_throws ArgumentError opt_md("(...))")
     end
 end
 
@@ -56,6 +59,9 @@ end
         # seed
         seq = opt_sd(target_dbn; seed=rand(UInt))
         test_seq(seq, target_dbn)
+        # illegal dbn
+        @test_throws ArgumentError opt_sd("((...)")
+        @test_throws ArgumentError opt_sd("(...))")
     end
 end
 
