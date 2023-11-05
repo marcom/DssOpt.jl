@@ -9,7 +9,7 @@ DssOpt_jll = "2c93a0bb-ae27-5046-8047-3b3578ee1502"
 
 [compat]
 Aqua = "0.6"
-CEnum = "0.4"
+CEnum = "0.5"
 DssOpt_jll = "=1.0.5"
 FoldRNA = "0.2"
 julia = "1.6"
